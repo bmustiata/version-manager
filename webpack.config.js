@@ -45,9 +45,9 @@ module.exports = {
     ]
   },
   plugins: [
-    new SmartBannerPlugin('require("source-map-support/register");\n',
-        {raw: true, entryOnly: false }),
-    new SmartBannerPlugin('#!/usr/bin/env node\n',
+    new SmartBannerPlugin(
+        '#!/usr/bin/env node\n' +
+        'require("source-map-support/register");\n',
         {raw: true, entryOnly: false })
   ],
   devtool: 'source-map'

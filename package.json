@@ -2,8 +2,8 @@
   "name": "version-manager",
   "version": "1.0.0",
   "description": "version-manager.",
-  "bin": {
-    "version-manager": "out/main.js"
+  "bin" : {
+    "version-manager" : "out/main.js"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -29,3 +29,4 @@
     "source-map-support": "0.4.6"
   }
 }
+
