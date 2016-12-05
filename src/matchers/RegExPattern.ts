@@ -6,7 +6,8 @@ export class RegExPattern implements IPattern {
 
   constructor(private trackedVersion: ITrackedVersion,
               private expression: string) {
-    this.RE = new RegExp(expression, "g")
+    console.log("building re: " + expression)
+    this.RE = new RegExp(expression, "gm")
   }
 
   applyPattern(input: string) : string {
