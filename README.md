@@ -40,7 +40,7 @@ second group replaced to the matched version.
 ### ##VERSION## File Matcher
 
 This will constrcut a RegExp from the given text, with the 
-##VERSION## being the second group. No care is taken for
+ ##VERSION## being the second group. No care is taken for
 characters that are valid RegExp characters.
 
 ## Notes
