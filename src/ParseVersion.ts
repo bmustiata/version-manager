@@ -10,5 +10,5 @@ export function parseVersion(version: string) : string {
         return version
     }
 
-    return child_process.execSync(`echo "${version}"`, {encoding: "utf8"})
+    return child_process.execSync(`echo -n "${version}"`, {encoding: "utf8"})
 }

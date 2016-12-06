@@ -1,4 +1,4 @@
-# version-manager
+# version-manager 1.1.1
 
 Updates versions across mulltiple files.
 
