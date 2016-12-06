@@ -11,15 +11,14 @@ npm install -g version-manager
 
 ## Usage
 
-You need a `versions.json`, where you can specify for what you're tracking the versions, and what files to be updated:
+You need a `versions.json`, where you can specify for what you're tracking the versions, and what files to be updated using glob patterns:
 
 ```json
 {
   "germanium" : {
     "version": "1.10.3",
     "files": {
-      "README.md": "^(germanium )(.*?)()$",
-      "README.rst": "^(germanium )(.*?)()$",
+      "README.*": "^(germanium )(.*?)()$",
       "setup.py": "version='##VERSION##',",
       "doc/usage/index.adoc": "^(= Germanium v)(.*?)()$",
       "germanium/version.py": "current = \"##VERSION##\""
@@ -54,3 +53,4 @@ so you can have a version such as:
 }
 ```
 
+Files are actually `glob` patterns, so you can match `**/*.js` for example.
