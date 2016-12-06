@@ -81,6 +81,7 @@ module.exports =
 	            console.log(colors.cyan(fileName) + ": Patching " + colors.cyan(resolvedName) + " " + ("for " + colors.green(trackedVersion.name + '@' + trackedVersion.version)));
 	            var content = fs.readFileSync(fileName, "utf-8");
 	            var newContent = versionPattern.applyPattern(content);
+	            // FIXME: there should be a way to specify how many should be in.
 	            if (versionPattern.getMatchCount() != 1) {
 	                console.error(colors.red("Matches != 1."));
 	                process.exit(3);
@@ -119,6 +120,7 @@ module.exports =
 	var path = __webpack_require__(7);
 	var fs = __webpack_require__(3);
 	var MatcherBuilder_1 = __webpack_require__(8);
+	var ParseVersion_1 = __webpack_require__(11);
 	var settingsFile = path.join(process.cwd(), "versions.json");
 	/**
 	 * readSettingsFile - Read the settings file.
@@ -133,6 +135,7 @@ module.exports =
 	    return Object.keys(settings).map(function (key) {
 	        var trackedEntry = settings[key];
 	        trackedEntry.name = key;
+	        trackedEntry.version = ParseVersion_1.parseVersion(trackedEntry.version);
 	        Object.keys(trackedEntry.files).forEach(function (file) {
 	            trackedEntry.files[file] = MatcherBuilder_1.matcherBuilder(trackedEntry, trackedEntry.files[file]);
 	        });
@@ -263,6 +266,32 @@ module.exports =
 	}();
 	
 	exports.StringPattern = StringPattern;
+
+/***/ },
+/* 11 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	
+	var child_process = __webpack_require__(12);
+	/**
+	 * Parse the given version string.
+	 */
+	function parseVersion(version) {
+	    // if we don't need to execute anything, just go
+	    // and return the current version.
+	    if (!version.includes('`') && !version.includes("$")) {
+	        return version;
+	    }
+	    return child_process.execSync("echo \"" + version + "\"", { encoding: "utf8" });
+	}
+	exports.parseVersion = parseVersion;
+
+/***/ },
+/* 12 */
+/***/ function(module, exports) {
+
+	module.exports = require("child_process");
 
 /***/ }
 /******/ ]);

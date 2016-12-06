@@ -23,6 +23,7 @@ versionsToProcess.forEach((trackedVersion) => {
       let content = fs.readFileSync(fileName, "utf-8")
       let newContent = versionPattern.applyPattern(content)
     
+      // FIXME: there should be a way to specify how many should be in.
       if (versionPattern.getMatchCount() != 1) {
         console.error(colors.red("Matches != 1."))
         process.exit(3)

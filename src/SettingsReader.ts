@@ -4,6 +4,7 @@ import * as fs from "fs"
 
 import { ITrackedVersionSet, ITrackedVersion } from "./interfaces"
 import { matcherBuilder } from "./MatcherBuilder"
+import { parseVersion } from "./ParseVersion"
 
 const settingsFile = path.join(process.cwd(), "versions.json");
 
@@ -25,6 +26,8 @@ export function readSettingsFile() : ITrackedVersionSet {
       let trackedEntry = settings[key]
 
       trackedEntry.name = key
+      trackedEntry.version = parseVersion(trackedEntry.version)
+
       Object.keys(trackedEntry.files).forEach((file) => {
         trackedEntry.files[file] = matcherBuilder(trackedEntry, trackedEntry.files[file])
       })
