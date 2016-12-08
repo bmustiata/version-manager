@@ -17,6 +17,8 @@ export class ArrayPattern implements IPattern {
     }
     
     getExpectedCount() : number {
-        return 1
+        return this.delegatePatterns
+            .map(it => it.getExpectedCount())
+            .reduce((x, y) => x + y, 0)
     }
 }

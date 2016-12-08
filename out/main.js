@@ -386,7 +386,11 @@ module.exports =
 	    }, {
 	        key: "getExpectedCount",
 	        value: function getExpectedCount() {
-	            return 1;
+	            return this.delegatePatterns.map(function (it) {
+	                return it.getExpectedCount();
+	            }).reduce(function (x, y) {
+	                return x + y;
+	            }, 0);
 	        }
 	    }]);
 	
