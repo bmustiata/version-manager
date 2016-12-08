@@ -3,8 +3,11 @@ import * as glob from "glob"
 import * as colors from "colors"
 
 import { readSettingsFile } from './SettingsReader'
+import { IPattern } from "./interfaces"
 
 const versionsToProcess = readSettingsFile();
+
+const filesToProcess : { [name: string] : Array<IPattern> } = {}
 
 versionsToProcess.forEach((trackedVersion) => {
   Object.keys(trackedVersion.files).forEach((fileName) => {
@@ -16,25 +19,45 @@ versionsToProcess.forEach((trackedVersion) => {
       process.exit(2)
     }
 
+    // first we collect all the files that we need to process
+    // into one nice map, with all the patterns that are going
+    // to run over those files.
     resolvedNames.forEach((resolvedName) => {
-      console.log(`${colors.cyan(fileName)}: Patching ${colors.cyan(resolvedName)} ` + 
-            `for ${colors.green(trackedVersion.name + '@' + trackedVersion.version)}`)
-
-      let content = fs.readFileSync(fileName, "utf-8")
-      let newContent = versionPattern.applyPattern(content)
-    
-      if (versionPattern.getMatchCount() != versionPattern.getExpectedCount()) {
-        console.error(
-          colors.red(
-            `Got ${versionPattern.getMatchCount()} matches ` +
-            `instead of ${versionPattern.getExpectedCount()}.`))
-        process.exit(3)
-      }
-
-      fs.writeFileSync(resolvedName, newContent, "utf-8")
+      let filePatterns = filesToProcess[resolvedName] || []
+      filePatterns.push(versionPattern)
+      filesToProcess[resolvedName] = filePatterns
     })
   })
 })
 
-process.exit(0);
+Object.keys(filesToProcess).forEach((resolvedName) => {
+  let content = fs.readFileSync(resolvedName, "utf-8")
+  let newContent = content
+    
+  console.log(`Patching ${colors.cyan(resolvedName)}:`)
 
+  filesToProcess[resolvedName].forEach((versionPattern) => {
+    let trackedVersion = versionPattern.trackedVersion
+    console.log(` * ${colors.green(trackedVersion.name + '@' + trackedVersion.version)}`)
+
+    newContent = versionPattern.applyPattern(newContent)
+
+    if (versionPattern.getMatchCount() != versionPattern.getExpectedCount()) {
+      console.error(
+        colors.red(
+          `Got ${versionPattern.getMatchCount()} matches ` +
+          `instead of ${versionPattern.getExpectedCount()}.`))
+      process.exit(3)
+    }
+  })
+
+  if (content == newContent) {
+    console.log(colors.cyan(`Content for ${resolvedName} is not changed. Won't patch it.`))
+    return;
+  }
+
+  fs.writeFileSync(resolvedName, newContent, "utf-8")
+  console.log(colors.yellow(`Updated ${resolvedName}`))
+})
+
+process.exit(0);

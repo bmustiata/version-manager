@@ -6,6 +6,16 @@
         "^(# version-manager )(.*?)$"
       ]
     }
+  },
+
+  "yolo": {
+    "version": "swag",
+    "files": {
+      "README.md" : {
+        "match": "notevenonce ##VERSION##",
+        "count": 0
+      }
+    }
   }
 }
 

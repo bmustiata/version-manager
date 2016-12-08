@@ -69,6 +69,7 @@ module.exports =
 	var colors = __webpack_require__(5);
 	var SettingsReader_1 = __webpack_require__(6);
 	var versionsToProcess = SettingsReader_1.readSettingsFile();
+	var filesToProcess = {};
 	versionsToProcess.forEach(function (trackedVersion) {
 	    Object.keys(trackedVersion.files).forEach(function (fileName) {
 	        var versionPattern = trackedVersion.files[fileName];
@@ -77,17 +78,35 @@ module.exports =
 	            console.error(colors.red("Unable to find any files for glob " + fileName + "."));
 	            process.exit(2);
 	        }
+	        // first we collect all the files that we need to process
+	        // into one nice map, with all the patterns that are going
+	        // to run over those files.
 	        resolvedNames.forEach(function (resolvedName) {
-	            console.log(colors.cyan(fileName) + ": Patching " + colors.cyan(resolvedName) + " " + ("for " + colors.green(trackedVersion.name + '@' + trackedVersion.version)));
-	            var content = fs.readFileSync(fileName, "utf-8");
-	            var newContent = versionPattern.applyPattern(content);
-	            if (versionPattern.getMatchCount() != versionPattern.getExpectedCount()) {
-	                console.error(colors.red("Got " + versionPattern.getMatchCount() + " matches " + ("instead of " + versionPattern.getExpectedCount() + ".")));
-	                process.exit(3);
-	            }
-	            fs.writeFileSync(resolvedName, newContent, "utf-8");
+	            var filePatterns = filesToProcess[resolvedName] || [];
+	            filePatterns.push(versionPattern);
+	            filesToProcess[resolvedName] = filePatterns;
 	        });
 	    });
+	});
+	Object.keys(filesToProcess).forEach(function (resolvedName) {
+	    var content = fs.readFileSync(resolvedName, "utf-8");
+	    var newContent = content;
+	    console.log("Patching " + colors.cyan(resolvedName) + ":");
+	    filesToProcess[resolvedName].forEach(function (versionPattern) {
+	        var trackedVersion = versionPattern.trackedVersion;
+	        console.log(" * " + colors.green(trackedVersion.name + '@' + trackedVersion.version));
+	        newContent = versionPattern.applyPattern(newContent);
+	        if (versionPattern.getMatchCount() != versionPattern.getExpectedCount()) {
+	            console.error(colors.red("Got " + versionPattern.getMatchCount() + " matches " + ("instead of " + versionPattern.getExpectedCount() + ".")));
+	            process.exit(3);
+	        }
+	    });
+	    if (content == newContent) {
+	        console.log(colors.cyan("Content for " + resolvedName + " is not changed. Won't patch it."));
+	        return;
+	    }
+	    fs.writeFileSync(resolvedName, newContent, "utf-8");
+	    console.log(colors.yellow("Updated " + resolvedName));
 	});
 	process.exit(0);
 
