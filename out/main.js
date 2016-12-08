@@ -81,9 +81,8 @@ module.exports =
 	            console.log(colors.cyan(fileName) + ": Patching " + colors.cyan(resolvedName) + " " + ("for " + colors.green(trackedVersion.name + '@' + trackedVersion.version)));
 	            var content = fs.readFileSync(fileName, "utf-8");
 	            var newContent = versionPattern.applyPattern(content);
-	            // FIXME: there should be a way to specify how many should be in.
-	            if (versionPattern.getMatchCount() != 1) {
-	                console.error(colors.red("Matches != 1."));
+	            if (versionPattern.getMatchCount() != versionPattern.getExpectedCount()) {
+	                console.error(colors.red("Got " + versionPattern.getMatchCount() + " matches " + ("instead of " + versionPattern.getExpectedCount() + ".")));
 	                process.exit(3);
 	            }
 	            fs.writeFileSync(resolvedName, newContent, "utf-8");
@@ -120,7 +119,7 @@ module.exports =
 	var path = __webpack_require__(7);
 	var fs = __webpack_require__(3);
 	var MatcherBuilder_1 = __webpack_require__(8);
-	var ParseVersion_1 = __webpack_require__(11);
+	var ParseVersion_1 = __webpack_require__(13);
 	var settingsFile = path.join(process.cwd(), "versions.json");
 	/**
 	 * readSettingsFile - Read the settings file.
@@ -164,7 +163,17 @@ module.exports =
 	
 	var RegExPattern_1 = __webpack_require__(9);
 	var StringPattern_1 = __webpack_require__(10);
+	var MatchCounter_1 = __webpack_require__(11);
+	var ArrayPattern_1 = __webpack_require__(12);
 	function matcherBuilder(trackedVersion, fileItem) {
+	    if (fileItem instanceof Array) {
+	        return new ArrayPattern_1.ArrayPattern(trackedVersion, fileItem.map(function (it) {
+	            return matcherBuilder(trackedVersion, it);
+	        }));
+	    }
+	    if (typeof fileItem['count'] != "undefined") {
+	        return new MatchCounter_1.MatchCounter(trackedVersion, matcherBuilder(trackedVersion, fileItem.match || fileItem.expression), fileItem.count);
+	    }
 	    if (fileItem.includes("##VERSION##")) {
 	        return new StringPattern_1.StringPattern(trackedVersion, fileItem);
 	    }
@@ -210,7 +219,7 @@ module.exports =
 	            var originalInput = input;
 	            var result = "";
 	            foundMatches.forEach(function (match) {
-	                result += originalInput.substring(originalIndex, match.index) + match[1] + _this.trackedVersion.version + match[3];
+	                result += originalInput.substring(originalIndex, match.index) + match[1] + _this.trackedVersion.version + (match[3] ? match[3] : "");
 	                originalIndex = match.index + match[0].length;
 	            });
 	            result += originalInput.substring(originalIndex, originalInput.length);
@@ -220,6 +229,11 @@ module.exports =
 	        key: "getMatchCount",
 	        value: function getMatchCount() {
 	            return this.matchCount;
+	        }
+	    }, {
+	        key: "getExpectedCount",
+	        value: function getExpectedCount() {
+	            return 1;
 	        }
 	    }]);
 	
@@ -260,6 +274,11 @@ module.exports =
 	        value: function getMatchCount() {
 	            return this._regexPattern.getMatchCount();
 	        }
+	    }, {
+	        key: "getExpectedCount",
+	        value: function getExpectedCount() {
+	            return 1;
+	        }
 	    }]);
 	
 	    return StringPattern;
@@ -269,11 +288,101 @@ module.exports =
 
 /***/ },
 /* 11 */
+/***/ function(module, exports) {
+
+	"use strict";
+	
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	var MatchCounter = function () {
+	    function MatchCounter(trackedVersion, delegatePattern, expectedCount) {
+	        _classCallCheck(this, MatchCounter);
+	
+	        this.trackedVersion = trackedVersion;
+	        this.delegatePattern = delegatePattern;
+	        this.expectedCount = expectedCount;
+	    }
+	
+	    _createClass(MatchCounter, [{
+	        key: "applyPattern",
+	        value: function applyPattern(input) {
+	            return this.delegatePattern.applyPattern(input);
+	        }
+	    }, {
+	        key: "getMatchCount",
+	        value: function getMatchCount() {
+	            if (this.expectedCount < 0) {
+	                return this.expectedCount;
+	            }
+	            return this.delegatePattern.getMatchCount();
+	        }
+	    }, {
+	        key: "getExpectedCount",
+	        value: function getExpectedCount() {
+	            return this.expectedCount;
+	        }
+	    }]);
+	
+	    return MatchCounter;
+	}();
+	
+	exports.MatchCounter = MatchCounter;
+
+/***/ },
+/* 12 */
+/***/ function(module, exports) {
+
+	"use strict";
+	
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	var ArrayPattern = function () {
+	    function ArrayPattern(trackedVersion, delegatePatterns) {
+	        _classCallCheck(this, ArrayPattern);
+	
+	        this.trackedVersion = trackedVersion;
+	        this.delegatePatterns = delegatePatterns;
+	    }
+	
+	    _createClass(ArrayPattern, [{
+	        key: "applyPattern",
+	        value: function applyPattern(input) {
+	            return this.delegatePatterns.reduce(function (input, pattern) {
+	                return pattern.applyPattern(input);
+	            }, input);
+	        }
+	    }, {
+	        key: "getMatchCount",
+	        value: function getMatchCount() {
+	            return this.delegatePatterns.map(function (it) {
+	                return it.getMatchCount();
+	            }).reduce(function (x, y) {
+	                return x + y;
+	            }, 0);
+	        }
+	    }, {
+	        key: "getExpectedCount",
+	        value: function getExpectedCount() {
+	            return 1;
+	        }
+	    }]);
+	
+	    return ArrayPattern;
+	}();
+	
+	exports.ArrayPattern = ArrayPattern;
+
+/***/ },
+/* 13 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
 	
-	var child_process = __webpack_require__(12);
+	var child_process = __webpack_require__(14);
 	/**
 	 * Parse the given version string.
 	 */
@@ -288,7 +397,7 @@ module.exports =
 	exports.parseVersion = parseVersion;
 
 /***/ },
-/* 12 */
+/* 14 */
 /***/ function(module, exports) {
 
 	module.exports = require("child_process");

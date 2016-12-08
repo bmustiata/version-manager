@@ -4,7 +4,7 @@ import { RegExPattern } from "./RegExPattern"
 export class StringPattern implements IPattern {
   private _regexPattern : RegExPattern
 
-  constructor(private trackedVersion: ITrackedVersion,
+  constructor(public trackedVersion: ITrackedVersion,
               private expression: string) {
     let reTokens = expression.split("##VERSION##")
 
@@ -17,5 +17,9 @@ export class StringPattern implements IPattern {
 
   getMatchCount() : number {
     return this._regexPattern.getMatchCount()
+  }
+
+  getExpectedCount() : number {
+    return 1
   }
 }

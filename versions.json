@@ -2,7 +2,9 @@
   "version" : {
     "version": "$(cat package.json | grep '\"version\"' | cut -f4 -d\\\")",
     "files": {
-      "README.md": "^(# version-manager )(.*?)()$"
+      "README.md": [
+        "^(# version-manager )(.*?)$"
+      ]
     }
   }
 }

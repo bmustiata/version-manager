@@ -4,7 +4,7 @@ export class RegExPattern implements IPattern {
   private RE: RegExp
   private matchCount : number = 0
 
-  constructor(private trackedVersion: ITrackedVersion,
+  constructor(public trackedVersion: ITrackedVersion,
               private expression: string) {
     this.RE = new RegExp(expression, "gm")
   }
@@ -31,7 +31,7 @@ export class RegExPattern implements IPattern {
       result += originalInput.substring(originalIndex, match.index) +
                 match[1] +
                 this.trackedVersion.version +
-                match[3];
+               (match[3] ? match[3] : "");
       originalIndex = match.index + match[0].length
     })
 
@@ -42,5 +42,9 @@ export class RegExPattern implements IPattern {
 
   getMatchCount() : number {
     return this.matchCount
-  }   
+  }
+
+  getExpectedCount() : number {
+    return 1
+  }
 }

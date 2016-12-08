@@ -19,6 +19,9 @@ export interface ITrackedVersion {
  * order to do version updates.
  */
 export interface IPattern {
+  trackedVersion: ITrackedVersion
+  
   applyPattern(input: string) : string
   getMatchCount() : number
+  getExpectedCount() : number
 }
