@@ -1,4 +1,4 @@
-# version-manager 1.2.1
+# version-manager 1.2.2
 
 Updates versions across mulltiple files.
 
@@ -38,9 +38,9 @@ second group replaced to the matched version.
 
 ### ##VERSION## File Matcher
 
-This will constrcut a RegExp from the given text, with 
-the ##VERSION## being the second group. No care is taken for
-characters that are valid RegExp characters.
+This will construct a RegExp from the given text, with 
+the ##VERSION## being the second group. RexExp characters will be
+escaped correctly. 
 
 ## Matcher Constraints
 

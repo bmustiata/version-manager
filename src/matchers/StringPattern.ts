@@ -1,12 +1,14 @@
 import { IPattern, ITrackedVersion } from "../interfaces"
 import { RegExPattern } from "./RegExPattern"
+import escapeStringRegexp = require("escape-string-regexp")
 
 export class StringPattern implements IPattern {
   private _regexPattern : RegExPattern
 
   constructor(public trackedVersion: ITrackedVersion,
               private expression: string) {
-    let reTokens = expression.split("##VERSION##")
+    let escapedExpression = escapeStringRegexp(expression);
+    let reTokens = escapedExpression.split("##VERSION##")
 
     this._regexPattern = new RegExPattern(trackedVersion, `(${reTokens[0]})(.*?)(${reTokens[1]})`)
   }

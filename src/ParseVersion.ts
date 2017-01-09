@@ -6,7 +6,7 @@ import * as child_process from "child_process"
 export function parseVersion(version: string) : string {
     // if we don't need to execute anything, just go
     // and return the current version.
-    if (! version.includes('`') && ! version.includes("$")) {
+    if (version.indexOf('`') == -1 && version.indexOf("$") == -1) {
         return version
     }
 

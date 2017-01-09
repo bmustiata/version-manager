@@ -138,7 +138,7 @@ module.exports =
 	var path = __webpack_require__(7);
 	var fs = __webpack_require__(3);
 	var MatcherBuilder_1 = __webpack_require__(8);
-	var ParseVersion_1 = __webpack_require__(13);
+	var ParseVersion_1 = __webpack_require__(14);
 	var settingsFile = path.join(process.cwd(), "versions.json");
 	/**
 	 * readSettingsFile - Read the settings file.
@@ -182,8 +182,8 @@ module.exports =
 	
 	var RegExPattern_1 = __webpack_require__(9);
 	var StringPattern_1 = __webpack_require__(10);
-	var MatchCounter_1 = __webpack_require__(11);
-	var ArrayPattern_1 = __webpack_require__(12);
+	var MatchCounter_1 = __webpack_require__(12);
+	var ArrayPattern_1 = __webpack_require__(13);
 	function matcherBuilder(trackedVersion, fileItem) {
 	    if (fileItem instanceof Array) {
 	        return new ArrayPattern_1.ArrayPattern(trackedVersion, fileItem.map(function (it) {
@@ -193,7 +193,7 @@ module.exports =
 	    if (typeof fileItem['count'] != "undefined") {
 	        return new MatchCounter_1.MatchCounter(trackedVersion, matcherBuilder(trackedVersion, fileItem.match || fileItem.expression), fileItem.count);
 	    }
-	    if (fileItem.includes("##VERSION##")) {
+	    if (fileItem.indexOf("##VERSION##") != -1) {
 	        return new StringPattern_1.StringPattern(trackedVersion, fileItem);
 	    }
 	    return new RegExPattern_1.RegExPattern(trackedVersion, fileItem);
@@ -272,6 +272,7 @@ module.exports =
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 	
 	var RegExPattern_1 = __webpack_require__(9);
+	var escapeStringRegexp = __webpack_require__(11);
 	
 	var StringPattern = function () {
 	    function StringPattern(trackedVersion, expression) {
@@ -279,7 +280,8 @@ module.exports =
 	
 	        this.trackedVersion = trackedVersion;
 	        this.expression = expression;
-	        var reTokens = expression.split("##VERSION##");
+	        var escapedExpression = escapeStringRegexp(expression);
+	        var reTokens = escapedExpression.split("##VERSION##");
 	        this._regexPattern = new RegExPattern_1.RegExPattern(trackedVersion, "(" + reTokens[0] + ")(.*?)(" + reTokens[1] + ")");
 	    }
 	
@@ -307,6 +309,12 @@ module.exports =
 
 /***/ },
 /* 11 */
+/***/ function(module, exports) {
+
+	module.exports = require("escape-string-regexp");
+
+/***/ },
+/* 12 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -350,7 +358,7 @@ module.exports =
 	exports.MatchCounter = MatchCounter;
 
 /***/ },
-/* 12 */
+/* 13 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -400,19 +408,19 @@ module.exports =
 	exports.ArrayPattern = ArrayPattern;
 
 /***/ },
-/* 13 */
+/* 14 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
 	
-	var child_process = __webpack_require__(14);
+	var child_process = __webpack_require__(15);
 	/**
 	 * Parse the given version string.
 	 */
 	function parseVersion(version) {
 	    // if we don't need to execute anything, just go
 	    // and return the current version.
-	    if (!version.includes('`') && !version.includes("$")) {
+	    if (version.indexOf('`') == -1 && version.indexOf("$") == -1) {
 	        return version;
 	    }
 	    return child_process.execSync("echo -n \"" + version + "\"", { encoding: "utf8" });
@@ -420,7 +428,7 @@ module.exports =
 	exports.parseVersion = parseVersion;
 
 /***/ },
-/* 14 */
+/* 15 */
 /***/ function(module, exports) {
 
 	module.exports = require("child_process");

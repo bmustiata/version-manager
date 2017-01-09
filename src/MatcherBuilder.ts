@@ -21,7 +21,7 @@ export function matcherBuilder(trackedVersion: ITrackedVersion, fileItem: any) :
     );
   }
 
-  if (fileItem.includes("##VERSION##")) {
+  if (fileItem.indexOf("##VERSION##") != -1) {
     return new StringPattern(trackedVersion, fileItem)
   }
 
