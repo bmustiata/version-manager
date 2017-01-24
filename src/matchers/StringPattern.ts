@@ -17,8 +17,6 @@ export class StringPattern implements IPattern {
                         `${m[3] == '$$' ? '$' : `(${m[4]})`}`;
 
     this._regexPattern = new RegExPattern(trackedVersion, regexpValue)
-
-    console.log(`Pattern is ${regexpValue}`)
   }
 
   applyPattern(input: string) : string {
