@@ -1,4 +1,4 @@
-# version-manager 1.3.1
+# version-manager 1.4.0
 
 Updates versions across mulltiple files.
 
@@ -11,7 +11,8 @@ npm install -g version-manager
 
 ## Usage
 
-You need a `versions.json`, where you can specify for what you're tracking the versions, and what files to be updated using glob patterns:
+You need a `versions.json`, or a `versions.yml` where you can specify for what
+you're tracking the versions, and what files to be updated using glob patterns:
 
 ```json
 {
@@ -169,3 +170,4 @@ or even individual expressions:
 ## Notes
 
 1. Files are actually `glob` patterns, so you can match `**/*.js` for example.
+2. The configuration files can be yml.
