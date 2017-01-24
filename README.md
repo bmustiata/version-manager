@@ -1,4 +1,4 @@
-# version-manager 1.3.0
+# version-manager 1.3.1
 
 Updates versions across mulltiple files.
 
@@ -61,9 +61,29 @@ second group replaced to the matched version.
 
 ### ##VERSION## File Matcher
 
-This will construct a RegExp from the given text, with 
-the ##VERSION## being the second group. RexExp characters will be
-escaped correctly. 
+This will construct a RegExp that will match exactly the given text, with
+the ##VERSION## being the second group.
+
+So having a matcher such as:
+
+```json
+"files": {
+    "README": "This installs version ##VERSION## of the product."
+}
+```
+
+is equivalent with:
+
+```json
+"files": {
+    "README": "(This installs version )(.+?)( of the product\\.)"
+}
+```
+
+If the `##`s are replaced with `^^` at the beginning, or `$$` at the end, they
+will act as RegExp anchors, equivalent to `^` and `$`. In case in the
+expression there is content before the `^^`, or after the `$$`, the content is
+ignored.
 
 ## Matcher Constraints
 

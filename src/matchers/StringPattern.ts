@@ -5,12 +5,20 @@ import escapeStringRegexp = require("escape-string-regexp")
 export class StringPattern implements IPattern {
   private _regexPattern : RegExPattern
 
+  public static RE = /^(.*?)(\^\^|##)VERSION(##|\$\$)(.*?)$/;
+
   constructor(public trackedVersion: ITrackedVersion,
               private expression: string) {
-    let escapedExpression = escapeStringRegexp(expression);
-    let reTokens = escapedExpression.split("##VERSION##")
+    const escapedExpression = escapeStringRegexp(expression);
+    const m = StringPattern.RE.exec(expression)
 
-    this._regexPattern = new RegExPattern(trackedVersion, `(${reTokens[0]})(.*?)(${reTokens[1]})`)
+    const regexpValue = `${m[2] == '^^' ? '^()' : `(${m[1]})`}` +
+                        `(.*?)` + 
+                        `${m[3] == '$$' ? '$' : `(${m[4]})`}`;
+
+    this._regexPattern = new RegExPattern(trackedVersion, regexpValue)
+
+    console.log(`Pattern is ${regexpValue}`)
   }
 
   applyPattern(input: string) : string {

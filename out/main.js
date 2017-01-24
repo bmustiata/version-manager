@@ -193,7 +193,7 @@ module.exports =
 	    if (typeof fileItem['count'] != "undefined") {
 	        return new MatchCounter_1.MatchCounter(trackedVersion, matcherBuilder(trackedVersion, fileItem.match || fileItem.expression), fileItem.count);
 	    }
-	    if (fileItem.indexOf("##VERSION##") != -1) {
+	    if (StringPattern_1.StringPattern.RE.test(fileItem)) {
 	        return new StringPattern_1.StringPattern(trackedVersion, fileItem);
 	    }
 	    return new RegExPattern_1.RegExPattern(trackedVersion, fileItem);
@@ -281,8 +281,10 @@ module.exports =
 	        this.trackedVersion = trackedVersion;
 	        this.expression = expression;
 	        var escapedExpression = escapeStringRegexp(expression);
-	        var reTokens = escapedExpression.split("##VERSION##");
-	        this._regexPattern = new RegExPattern_1.RegExPattern(trackedVersion, "(" + reTokens[0] + ")(.*?)(" + reTokens[1] + ")");
+	        var m = StringPattern.RE.exec(expression);
+	        var regexpValue = "" + (m[2] == '^^' ? '^()' : "(" + m[1] + ")") + "(.*?)" + ("" + (m[3] == '$$' ? '$' : "(" + m[4] + ")"));
+	        this._regexPattern = new RegExPattern_1.RegExPattern(trackedVersion, regexpValue);
+	        console.log("Pattern is " + regexpValue);
 	    }
 	
 	    _createClass(StringPattern, [{
@@ -305,6 +307,7 @@ module.exports =
 	    return StringPattern;
 	}();
 	
+	StringPattern.RE = /^(.*?)(\^\^|##)VERSION(##|\$\$)(.*?)$/;
 	exports.StringPattern = StringPattern;
 
 /***/ },
