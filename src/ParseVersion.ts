@@ -8,7 +8,12 @@ import { ITrackedVersionSet } from "./interfaces"
 const settingFiles : {[name: string]: ITrackedVersionSet} = {}
 
 function parseParentPath(version: string, cwd: string) : string {
-    const items = version.split(':', 3)
+    const items = /^parent:(.+)@(.+?)$/.exec(version)
+
+    if (!items) {
+        throw new Error(`The version must be in the 'parent:path@propertyname' ` +
+                        `format, got instead: '${version}'.`)
+    }
 
     const parentVersionsFilePath = items[1]
     const propertyName = items[2]

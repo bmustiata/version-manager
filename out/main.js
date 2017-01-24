@@ -420,7 +420,10 @@ module.exports =
 	// cache the settings files.
 	var settingFiles = {};
 	function parseParentPath(version, cwd) {
-	    var items = version.split(':', 3);
+	    var items = /^parent:(.+)@(.+?)$/.exec(version);
+	    if (!items) {
+	        throw new Error("The version must be in the 'parent:path@propertyname' " + ("format, got instead: '" + version + "'."));
+	    }
 	    var parentVersionsFilePath = items[1];
 	    var propertyName = items[2];
 	    var fullPath = path.resolve(path.join(cwd, items[1]));

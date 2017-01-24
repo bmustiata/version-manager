@@ -27,6 +27,29 @@ You need a `versions.json`, where you can specify for what you're tracking the v
 }
 ```
 
+## Specifying Versions
+
+The version will be expanded using the shell if it contains a '$' or a '`',
+so you can have a version such as:
+
+```json
+"description": {
+  "version": "Build at $(date) on $(uname -n)"
+}
+```
+
+Versions can also refer to other version files, and extract properties from
+there, using the `parent:` notation in the version:
+
+```json
+"description": {
+  "version": "parent:../germanium/@germaniumdrivers"
+}
+```
+
+The path will point to the `versions.json` file, or to the folder that contains
+the `versions.json` file, and the `germaniumdrivers` version will be used.
+
 ## File Matchers
 
 There are currently only two file matchers:
@@ -125,13 +148,4 @@ or even individual expressions:
 
 ## Notes
 
-1. The version will be expanded using the shell if it contains a '$' or a '`',
-so you can have a version such as:
-
-```json
-"description": {
-  "version": "Build at $(date) on $(uname -n)"
-}
-```
-
-2. Files are actually `glob` patterns, so you can match `**/*.js` for example.
+1. Files are actually `glob` patterns, so you can match `**/*.js` for example.
