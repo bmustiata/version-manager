@@ -6,16 +6,14 @@ import { ITrackedVersionSet, ITrackedVersion } from "./interfaces"
 import { matcherBuilder } from "./MatcherBuilder"
 import { parseVersion } from "./ParseVersion"
 
-const settingsFile = path.join(process.cwd(), "versions.json");
-
 
 /**
  * readSettingsFile - Read the settings file.
- * @return {Object}
+ * @return {ITrackedVersionSet}
  */
-export function readSettingsFile() : ITrackedVersionSet {
-  if (!settingsFileExists()) {
-    reportMissingSettingsFile();
+export function readSettingsFile(settingsFile: string) : ITrackedVersionSet {
+  if (!settingsFileExists(settingsFile)) {
+    reportMissingSettingsFile(settingsFile);
     process.exit(1);
   }
 
@@ -36,10 +34,10 @@ export function readSettingsFile() : ITrackedVersionSet {
     });
 }
 
-function settingsFileExists() {
+function settingsFileExists(settingsFile: string) {
   return fs.existsSync(settingsFile);
 }
 
-function reportMissingSettingsFile() {
+function reportMissingSettingsFile(settingsFile: string) {
   console.log(colors.red(settingsFile + " configuration file is missing."));
 }

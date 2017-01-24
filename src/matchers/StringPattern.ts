@@ -12,7 +12,7 @@ export class StringPattern implements IPattern {
 
     this._regexPattern = new RegExPattern(trackedVersion, `(${reTokens[0]})(.*?)(${reTokens[1]})`)
   }
-  
+
   applyPattern(input: string) : string {
     return this._regexPattern.applyPattern(input)
   }

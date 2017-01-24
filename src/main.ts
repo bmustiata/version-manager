@@ -1,11 +1,13 @@
 import * as fs from "fs"
 import * as glob from "glob"
 import * as colors from "colors"
+import * as path from "path"
 
 import { readSettingsFile } from './SettingsReader'
 import { IPattern } from "./interfaces"
 
-const versionsToProcess = readSettingsFile();
+const defaultSettingsFile = path.resolve(path.join(process.cwd(), "versions.json"))
+const versionsToProcess = readSettingsFile(defaultSettingsFile);
 
 const filesToProcess : { [name: string] : Array<IPattern> } = {}
 

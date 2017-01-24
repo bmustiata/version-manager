@@ -67,8 +67,10 @@ module.exports =
 	var fs = __webpack_require__(3);
 	var glob = __webpack_require__(4);
 	var colors = __webpack_require__(5);
-	var SettingsReader_1 = __webpack_require__(6);
-	var versionsToProcess = SettingsReader_1.readSettingsFile();
+	var path = __webpack_require__(6);
+	var SettingsReader_1 = __webpack_require__(7);
+	var defaultSettingsFile = path.resolve(path.join(process.cwd(), "versions.json"));
+	var versionsToProcess = SettingsReader_1.readSettingsFile(defaultSettingsFile);
 	var filesToProcess = {};
 	versionsToProcess.forEach(function (trackedVersion) {
 	    Object.keys(trackedVersion.files).forEach(function (fileName) {
@@ -130,23 +132,27 @@ module.exports =
 
 /***/ },
 /* 6 */
+/***/ function(module, exports) {
+
+	module.exports = require("path");
+
+/***/ },
+/* 7 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
 	
 	var colors = __webpack_require__(5);
-	var path = __webpack_require__(7);
 	var fs = __webpack_require__(3);
 	var MatcherBuilder_1 = __webpack_require__(8);
 	var ParseVersion_1 = __webpack_require__(14);
-	var settingsFile = path.join(process.cwd(), "versions.json");
 	/**
 	 * readSettingsFile - Read the settings file.
-	 * @return {Object}
+	 * @return {ITrackedVersionSet}
 	 */
-	function readSettingsFile() {
-	    if (!settingsFileExists()) {
-	        reportMissingSettingsFile();
+	function readSettingsFile(settingsFile) {
+	    if (!settingsFileExists(settingsFile)) {
+	        reportMissingSettingsFile(settingsFile);
 	        process.exit(1);
 	    }
 	    var settings = JSON.parse(fs.readFileSync(settingsFile, "utf-8"));
@@ -161,18 +167,12 @@ module.exports =
 	    });
 	}
 	exports.readSettingsFile = readSettingsFile;
-	function settingsFileExists() {
+	function settingsFileExists(settingsFile) {
 	    return fs.existsSync(settingsFile);
 	}
-	function reportMissingSettingsFile() {
+	function reportMissingSettingsFile(settingsFile) {
 	    console.log(colors.red(settingsFile + " configuration file is missing."));
 	}
-
-/***/ },
-/* 7 */
-/***/ function(module, exports) {
-
-	module.exports = require("path");
 
 /***/ },
 /* 8 */
@@ -414,16 +414,64 @@ module.exports =
 	"use strict";
 	
 	var child_process = __webpack_require__(15);
+	var path = __webpack_require__(6);
+	var fs = __webpack_require__(3);
+	var SettingsReader_1 = __webpack_require__(7);
+	// cache the settings files.
+	var settingFiles = {};
+	function parseParentPath(version, cwd) {
+	    var items = version.split(':', 3);
+	    var parentVersionsFilePath = items[1];
+	    var propertyName = items[2];
+	    var fullPath = path.resolve(path.join(cwd, items[1]));
+	    if (!fs.existsSync(fullPath)) {
+	        throw new Error("Unable to find referenced file: " + fullPath);
+	    }
+	    if (fs.statSync(fullPath).isDirectory()) {
+	        fullPath = path.join(fullPath, "versions.json");
+	    }
+	    if (!settingFiles[fullPath]) {
+	        settingFiles[fullPath] = SettingsReader_1.readSettingsFile(fullPath);
+	    }
+	    var propertyValue = settingFiles[fullPath].find(function (it) {
+	        return it.name == propertyName;
+	    });
+	    if (!propertyValue) {
+	        var availableProperties = settingFiles[fullPath].map(function (it) {
+	            return it.name + "@" + it.version;
+	        }).join(", ");
+	        throw new Error("Property '" + propertyName + "' is not defined in " + fullPath + (" settings file. Available properties are: " + availableProperties + "."));
+	    }
+	    return propertyValue.version;
+	}
+	function parseVersionWithPath(version, cwd) {
+	    // from here, the path becomes important, since the process execution
+	    // and the parent: referening depends on where the currently parsed
+	    // versions.json file is being parsed from.
+	    var oldPath = process.cwd();
+	    try {
+	        process.chdir(cwd);
+	        // check if this is not an external json file, in the
+	        // format: parent:../path/to/versions.json:property_name
+	        // or    : parent:../path/to:property_name
+	        if (version.startsWith('parent:')) {
+	            return parseParentPath(version, cwd);
+	        }
+	        // if we don't need to execute anything, just go
+	        // and return the current version.
+	        if (version.indexOf('`') == -1 && version.indexOf("$") == -1) {
+	            return version;
+	        }
+	        return child_process.execSync("echo -n \"" + version + "\"", { encoding: "utf8" });
+	    } finally {
+	        process.chdir(oldPath);
+	    }
+	}
 	/**
 	 * Parse the given version string.
 	 */
 	function parseVersion(version) {
-	    // if we don't need to execute anything, just go
-	    // and return the current version.
-	    if (version.indexOf('`') == -1 && version.indexOf("$") == -1) {
-	        return version;
-	    }
-	    return child_process.execSync("echo -n \"" + version + "\"", { encoding: "utf8" });
+	    return parseVersionWithPath(version, process.cwd());
 	}
 	exports.parseVersion = parseVersion;
 
