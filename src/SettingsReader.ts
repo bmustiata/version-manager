@@ -1,6 +1,7 @@
 import * as colors from "colors"
 import * as path from "path"
 import * as fs from "fs"
+import * as yaml from "js-yaml"
 
 import { ITrackedVersionSet, ITrackedVersion } from "./interfaces"
 import { matcherBuilder } from "./MatcherBuilder"
@@ -13,11 +14,15 @@ import { parseVersion } from "./ParseVersion"
  */
 export function readSettingsFile(settingsFile: string) : ITrackedVersionSet {
   if (!settingsFileExists(settingsFile)) {
-    reportMissingSettingsFile(settingsFile);
-    process.exit(1);
+    settingsFile = path.join(path.dirname(settingsFile), "versions.yml")
+
+    if (!settingsFileExists(settingsFile)) {
+      reportMissingSettingsFile(settingsFile);
+      process.exit(1);
+    }
   }
 
-  const settings = JSON.parse(fs.readFileSync(settingsFile, "utf-8"));
+  const settings = yaml.load(fs.readFileSync(settingsFile, "utf-8"));
 
   return Object.keys(settings)
     .map((key) => {

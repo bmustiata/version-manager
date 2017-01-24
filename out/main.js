@@ -143,19 +143,24 @@ module.exports =
 	"use strict";
 	
 	var colors = __webpack_require__(5);
+	var path = __webpack_require__(6);
 	var fs = __webpack_require__(3);
-	var MatcherBuilder_1 = __webpack_require__(8);
-	var ParseVersion_1 = __webpack_require__(14);
+	var yaml = __webpack_require__(8);
+	var MatcherBuilder_1 = __webpack_require__(9);
+	var ParseVersion_1 = __webpack_require__(15);
 	/**
 	 * readSettingsFile - Read the settings file.
 	 * @return {ITrackedVersionSet}
 	 */
 	function readSettingsFile(settingsFile) {
 	    if (!settingsFileExists(settingsFile)) {
-	        reportMissingSettingsFile(settingsFile);
-	        process.exit(1);
+	        settingsFile = path.join(path.dirname(settingsFile), "versions.yml");
+	        if (!settingsFileExists(settingsFile)) {
+	            reportMissingSettingsFile(settingsFile);
+	            process.exit(1);
+	        }
 	    }
-	    var settings = JSON.parse(fs.readFileSync(settingsFile, "utf-8"));
+	    var settings = yaml.load(fs.readFileSync(settingsFile, "utf-8"));
 	    return Object.keys(settings).map(function (key) {
 	        var trackedEntry = settings[key];
 	        trackedEntry.name = key;
@@ -176,14 +181,20 @@ module.exports =
 
 /***/ },
 /* 8 */
+/***/ function(module, exports) {
+
+	module.exports = require("js-yaml");
+
+/***/ },
+/* 9 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
 	
-	var RegExPattern_1 = __webpack_require__(9);
-	var StringPattern_1 = __webpack_require__(10);
-	var MatchCounter_1 = __webpack_require__(12);
-	var ArrayPattern_1 = __webpack_require__(13);
+	var RegExPattern_1 = __webpack_require__(10);
+	var StringPattern_1 = __webpack_require__(11);
+	var MatchCounter_1 = __webpack_require__(13);
+	var ArrayPattern_1 = __webpack_require__(14);
 	function matcherBuilder(trackedVersion, fileItem) {
 	    if (fileItem instanceof Array) {
 	        return new ArrayPattern_1.ArrayPattern(trackedVersion, fileItem.map(function (it) {
@@ -201,7 +212,7 @@ module.exports =
 	exports.matcherBuilder = matcherBuilder;
 
 /***/ },
-/* 9 */
+/* 10 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -262,7 +273,7 @@ module.exports =
 	exports.RegExPattern = RegExPattern;
 
 /***/ },
-/* 10 */
+/* 11 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -271,8 +282,8 @@ module.exports =
 	
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 	
-	var RegExPattern_1 = __webpack_require__(9);
-	var escapeStringRegexp = __webpack_require__(11);
+	var RegExPattern_1 = __webpack_require__(10);
+	var escapeStringRegexp = __webpack_require__(12);
 	
 	var StringPattern = function () {
 	    function StringPattern(trackedVersion, expression) {
@@ -284,7 +295,6 @@ module.exports =
 	        var m = StringPattern.RE.exec(expression);
 	        var regexpValue = "" + (m[2] == '^^' ? '^()' : "(" + m[1] + ")") + "(.*?)" + ("" + (m[3] == '$$' ? '$' : "(" + m[4] + ")"));
 	        this._regexPattern = new RegExPattern_1.RegExPattern(trackedVersion, regexpValue);
-	        console.log("Pattern is " + regexpValue);
 	    }
 	
 	    _createClass(StringPattern, [{
@@ -311,13 +321,13 @@ module.exports =
 	exports.StringPattern = StringPattern;
 
 /***/ },
-/* 11 */
+/* 12 */
 /***/ function(module, exports) {
 
 	module.exports = require("escape-string-regexp");
 
 /***/ },
-/* 12 */
+/* 13 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -361,7 +371,7 @@ module.exports =
 	exports.MatchCounter = MatchCounter;
 
 /***/ },
-/* 13 */
+/* 14 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -411,12 +421,12 @@ module.exports =
 	exports.ArrayPattern = ArrayPattern;
 
 /***/ },
-/* 14 */
+/* 15 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
 	
-	var child_process = __webpack_require__(15);
+	var child_process = __webpack_require__(16);
 	var path = __webpack_require__(6);
 	var fs = __webpack_require__(3);
 	var SettingsReader_1 = __webpack_require__(7);
@@ -482,7 +492,7 @@ module.exports =
 	exports.parseVersion = parseVersion;
 
 /***/ },
-/* 15 */
+/* 16 */
 /***/ function(module, exports) {
 
 	module.exports = require("child_process");
