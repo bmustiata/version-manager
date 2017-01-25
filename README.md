@@ -1,4 +1,4 @@
-# version-manager 1.4.2
+# version-manager 1.5.0
 
 Updates versions across multiple files.
 
@@ -86,6 +86,25 @@ If the `**`s are replaced with `^^` at the beginning, or `$$` at the end, they
 will act as RegExp anchors, equivalent to `^` and `$`. In case in the
 expression there is content before the `^^`, or after the `$$`, the content is
 ignored.
+
+### maven: File Matcher
+
+This will construct a RegExp that will match:
+
+```text
+`(<groupId>${m[1]}</groupId>\\s*` +
+`<artifactId>${m[2]}</artifactId>\\s*` +
+`<version>)(.*?)(</version>)`;
+```
+
+In order to specify the matcher, just use:
+
+```yml
+germaniumY
+  version: 2.0.0
+  files:
+    pom.xml: maven:com.germaniumhq:germanium
+```
 
 ## Matcher Constraints
 
