@@ -1,6 +1,7 @@
 import { ITrackedVersion, IPattern } from "./interfaces"
 import { RegExPattern } from "./matchers/RegExPattern"
 import { StringPattern } from "./matchers/StringPattern"
+import { MavenPattern } from "./matchers/MavenPattern"
 import { MatchCounter } from "./matchers/MatchCounter"
 import { ArrayPattern } from "./matchers/ArrayPattern"
 
@@ -19,6 +20,10 @@ export function matcherBuilder(trackedVersion: ITrackedVersion, fileItem: any) :
           fileItem.match || fileItem.expression),
       fileItem.count
     );
+  }
+
+  if (MavenPattern.RE.test(fileItem)) {
+    return new MavenPattern(trackedVersion, fileItem)
   }
 
   if (StringPattern.RE.test(fileItem)) {

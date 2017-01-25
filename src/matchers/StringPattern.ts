@@ -9,7 +9,6 @@ export class StringPattern implements IPattern {
 
   constructor(public trackedVersion: ITrackedVersion,
               private expression: string) {
-    const escapedExpression = escapeStringRegexp(expression);
     const m = StringPattern.RE.exec(expression)
 
     if (m[2] == '##' || m[3] == '##') {
@@ -19,9 +18,9 @@ export class StringPattern implements IPattern {
               `a comment in YAML. Use '**' instead.`)
     }
 
-    const regexpValue = `${m[2] == '^^' ? '^()' : `(${m[1]})`}` +
+    const regexpValue = `${m[2] == '^^' ? '^()' : `(${escapeStringRegexp(m[1])})`}` +
                         `(.*?)` + 
-                        `${m[3] == '$$' ? '$' : `(${m[4]})`}`;
+                        `${m[3] == '$$' ? '$' : `(${escapeStringRegexp(m[4])})`}`;
 
     this._regexPattern = new RegExPattern(trackedVersion, regexpValue)
   }

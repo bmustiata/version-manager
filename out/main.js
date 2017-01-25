@@ -147,7 +147,7 @@ module.exports =
 	var fs = __webpack_require__(3);
 	var yaml = __webpack_require__(8);
 	var MatcherBuilder_1 = __webpack_require__(9);
-	var ParseVersion_1 = __webpack_require__(15);
+	var ParseVersion_1 = __webpack_require__(16);
 	/**
 	 * readSettingsFile - Read the settings file.
 	 * @return {ITrackedVersionSet}
@@ -193,8 +193,9 @@ module.exports =
 	
 	var RegExPattern_1 = __webpack_require__(10);
 	var StringPattern_1 = __webpack_require__(11);
-	var MatchCounter_1 = __webpack_require__(13);
-	var ArrayPattern_1 = __webpack_require__(14);
+	var MavenPattern_1 = __webpack_require__(13);
+	var MatchCounter_1 = __webpack_require__(14);
+	var ArrayPattern_1 = __webpack_require__(15);
 	function matcherBuilder(trackedVersion, fileItem) {
 	    if (fileItem instanceof Array) {
 	        return new ArrayPattern_1.ArrayPattern(trackedVersion, fileItem.map(function (it) {
@@ -203,6 +204,9 @@ module.exports =
 	    }
 	    if (typeof fileItem['count'] != "undefined") {
 	        return new MatchCounter_1.MatchCounter(trackedVersion, matcherBuilder(trackedVersion, fileItem.match || fileItem.expression), fileItem.count);
+	    }
+	    if (MavenPattern_1.MavenPattern.RE.test(fileItem)) {
+	        return new MavenPattern_1.MavenPattern(trackedVersion, fileItem);
 	    }
 	    if (StringPattern_1.StringPattern.RE.test(fileItem)) {
 	        return new StringPattern_1.StringPattern(trackedVersion, fileItem);
@@ -291,12 +295,11 @@ module.exports =
 	
 	        this.trackedVersion = trackedVersion;
 	        this.expression = expression;
-	        var escapedExpression = escapeStringRegexp(expression);
 	        var m = StringPattern.RE.exec(expression);
 	        if (m[2] == '##' || m[3] == '##') {
 	            console.warn("Version matched using expression '" + expression + "' " + "still uses the old '##' notation for delimiting the " + "version. This is not supported anymore since # denotes " + "a comment in YAML. Use '**' instead.");
 	        }
-	        var regexpValue = "" + (m[2] == '^^' ? '^()' : "(" + m[1] + ")") + "(.*?)" + ("" + (m[3] == '$$' ? '$' : "(" + m[4] + ")"));
+	        var regexpValue = "" + (m[2] == '^^' ? '^()' : "(" + escapeStringRegexp(m[1]) + ")") + "(.*?)" + ("" + (m[3] == '$$' ? '$' : "(" + escapeStringRegexp(m[4]) + ")"));
 	        this._regexPattern = new RegExPattern_1.RegExPattern(trackedVersion, regexpValue);
 	    }
 	
@@ -331,6 +334,53 @@ module.exports =
 
 /***/ },
 /* 13 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	var RegExPattern_1 = __webpack_require__(10);
+	var escapeStringRegexp = __webpack_require__(12);
+	
+	var MavenPattern = function () {
+	    function MavenPattern(trackedVersion, expression) {
+	        _classCallCheck(this, MavenPattern);
+	
+	        this.trackedVersion = trackedVersion;
+	        this.expression = expression;
+	        var m = MavenPattern.RE.exec(expression);
+	        var regexpValue = "(<groupId>" + escapeStringRegexp(m[1]) + "</groupId>\\s*" + ("<artifactId>" + escapeStringRegexp(m[2]) + "</artifactId>\\s*") + "<version>)(.*?)(</version>)";
+	        this._regexPattern = new RegExPattern_1.RegExPattern(trackedVersion, regexpValue);
+	    }
+	
+	    _createClass(MavenPattern, [{
+	        key: "applyPattern",
+	        value: function applyPattern(input) {
+	            return this._regexPattern.applyPattern(input);
+	        }
+	    }, {
+	        key: "getMatchCount",
+	        value: function getMatchCount() {
+	            return this._regexPattern.getMatchCount();
+	        }
+	    }, {
+	        key: "getExpectedCount",
+	        value: function getExpectedCount() {
+	            return 1;
+	        }
+	    }]);
+	
+	    return MavenPattern;
+	}();
+	
+	MavenPattern.RE = /^maven\:(.*?)\:(.*?)$/;
+	exports.MavenPattern = MavenPattern;
+
+/***/ },
+/* 14 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -374,7 +424,7 @@ module.exports =
 	exports.MatchCounter = MatchCounter;
 
 /***/ },
-/* 14 */
+/* 15 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -424,14 +474,14 @@ module.exports =
 	exports.ArrayPattern = ArrayPattern;
 
 /***/ },
-/* 15 */
+/* 16 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
 	
 	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 	
-	var child_process = __webpack_require__(16);
+	var child_process = __webpack_require__(17);
 	var path = __webpack_require__(6);
 	var fs = __webpack_require__(3);
 	var SettingsReader_1 = __webpack_require__(7);
@@ -500,7 +550,7 @@ module.exports =
 	exports.parseVersion = parseVersion;
 
 /***/ },
-/* 16 */
+/* 17 */
 /***/ function(module, exports) {
 
 	module.exports = require("child_process");
