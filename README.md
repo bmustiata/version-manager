@@ -1,6 +1,6 @@
-# version-manager 1.4.0
+# version-manager 1.4.1
 
-Updates versions across mulltiple files.
+Updates versions across multiple files.
 
 ## Install
 
@@ -48,8 +48,9 @@ there, using the `parent:` notation in the version:
 }
 ```
 
-The path will point to the `versions.json` file, or to the folder that contains
-the `versions.json` file, and the `germaniumdrivers` version will be used.
+The path will point to the `versions.json/yml` file, or to the folder that
+contains the `versions.json/yml` file, and the `germaniumdrivers` version will
+be used.
 
 ## File Matchers
 
@@ -60,16 +61,16 @@ There are currently only two file matchers:
 It is a RegExp that has two or three groups, and it will have the 
 second group replaced to the matched version.
 
-### ##VERSION## File Matcher
+### **VERSION** File Matcher
 
 This will construct a RegExp that will match exactly the given text, with
-the ##VERSION## being the second group.
+the `**VERSION**` being the second group.
 
 So having a matcher such as:
 
 ```json
 "files": {
-    "README": "This installs version ##VERSION## of the product."
+    "README": "This installs version **VERSION** of the product."
 }
 ```
 
@@ -81,7 +82,7 @@ is equivalent with:
 }
 ```
 
-If the `##`s are replaced with `^^` at the beginning, or `$$` at the end, they
+If the `**`s are replaced with `^^` at the beginning, or `$$` at the end, they
 will act as RegExp anchors, equivalent to `^` and `$`. In case in the
 expression there is content before the `^^`, or after the `$$`, the content is
 ignored.
@@ -128,6 +129,9 @@ example:
   }
 }
 ```
+
+For each matcher that is added, if there is no match count specified, it's
+assumed that it will only match once in the file.
 
 Of course, constraints can be applied for both the full set of
 matchers:
