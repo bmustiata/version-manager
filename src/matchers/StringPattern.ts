@@ -5,12 +5,19 @@ import escapeStringRegexp = require("escape-string-regexp")
 export class StringPattern implements IPattern {
   private _regexPattern : RegExPattern
 
-  public static RE = /^(.*?)(\^\^|##)VERSION(##|\$\$)(.*?)$/;
+  public static RE = /^(.*?)(\^\^|##|\*\*)VERSION(##|\*\*|\$\$)(.*?)$/;
 
   constructor(public trackedVersion: ITrackedVersion,
               private expression: string) {
     const escapedExpression = escapeStringRegexp(expression);
     const m = StringPattern.RE.exec(expression)
+
+    if (m[2] == '##' || m[3] == '##') {
+      console.warn(`Version matched using expression '${expression}' ` +
+              `still uses the old '##' notation for delimiting the `  +
+              `version. This is not supported anymore since # denotes ` +
+              `a comment in YAML. Use '**' instead.`)
+    }
 
     const regexpValue = `${m[2] == '^^' ? '^()' : `(${m[1]})`}` +
                         `(.*?)` + 

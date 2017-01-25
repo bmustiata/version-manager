@@ -293,6 +293,9 @@ module.exports =
 	        this.expression = expression;
 	        var escapedExpression = escapeStringRegexp(expression);
 	        var m = StringPattern.RE.exec(expression);
+	        if (m[2] == '##' || m[3] == '##') {
+	            console.warn("Version matched using expression '" + expression + "' " + "still uses the old '##' notation for delimiting the " + "version. This is not supported anymore since # denotes " + " a comment in YAML.");
+	        }
 	        var regexpValue = "" + (m[2] == '^^' ? '^()' : "(" + m[1] + ")") + "(.*?)" + ("" + (m[3] == '$$' ? '$' : "(" + m[4] + ")"));
 	        this._regexPattern = new RegExPattern_1.RegExPattern(trackedVersion, regexpValue);
 	    }
@@ -317,7 +320,7 @@ module.exports =
 	    return StringPattern;
 	}();
 	
-	StringPattern.RE = /^(.*?)(\^\^|##)VERSION(##|\$\$)(.*?)$/;
+	StringPattern.RE = /^(.*?)(\^\^|##|\*\*)VERSION(##|\*\*|\$\$)(.*?)$/;
 	exports.StringPattern = StringPattern;
 
 /***/ },
