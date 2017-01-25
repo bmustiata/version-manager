@@ -294,7 +294,7 @@ module.exports =
 	        var escapedExpression = escapeStringRegexp(expression);
 	        var m = StringPattern.RE.exec(expression);
 	        if (m[2] == '##' || m[3] == '##') {
-	            console.warn("Version matched using expression '" + expression + "' " + "still uses the old '##' notation for delimiting the " + "version. This is not supported anymore since # denotes " + " a comment in YAML.");
+	            console.warn("Version matched using expression '" + expression + "' " + "still uses the old '##' notation for delimiting the " + "version. This is not supported anymore since # denotes " + "a comment in YAML. Use '**' instead.");
 	        }
 	        var regexpValue = "" + (m[2] == '^^' ? '^()' : "(" + m[1] + ")") + "(.*?)" + ("" + (m[3] == '$$' ? '$' : "(" + m[4] + ")"));
 	        this._regexPattern = new RegExPattern_1.RegExPattern(trackedVersion, regexpValue);
@@ -429,6 +429,8 @@ module.exports =
 
 	"use strict";
 	
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+	
 	var child_process = __webpack_require__(16);
 	var path = __webpack_require__(6);
 	var fs = __webpack_require__(3);
@@ -468,6 +470,9 @@ module.exports =
 	    // and the parent: referening depends on where the currently parsed
 	    // versions.json file is being parsed from.
 	    var oldPath = process.cwd();
+	    if (typeof version !== "string") {
+	        throw new Error("Got version a " + version + " of type " + (typeof version === "undefined" ? "undefined" : _typeof(version)) + ", in " + cwd + ".");
+	    }
 	    try {
 	        process.chdir(cwd);
 	        // check if this is not an external json file, in the

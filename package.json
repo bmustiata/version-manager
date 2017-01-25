@@ -1,6 +1,6 @@
 {
   "name": "version-manager",
-  "version": "1.4.1",
+  "version": "1.4.2",
   "description": "version-manager.",
   "bin": {
     "version-manager": "out/main.js"

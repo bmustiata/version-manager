@@ -53,6 +53,10 @@ function parseVersionWithPath(version: string, cwd: string) : string {
     // versions.json file is being parsed from.
     const oldPath = process.cwd()
 
+    if (typeof version !== "string") {
+        throw new Error(`Got version a ${version} of type ${typeof version}, in ${cwd}.`)
+    }
+
     try {
         process.chdir(cwd)
 
