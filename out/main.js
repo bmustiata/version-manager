@@ -165,6 +165,10 @@ module.exports =
 	        var trackedEntry = settings[key];
 	        trackedEntry.name = key;
 	        trackedEntry.version = ParseVersion_1.parseVersion(trackedEntry.version);
+	        // made the files optional, so we can have "bom" version files
+	        if (!trackedEntry.files) {
+	            trackedEntry.files = {};
+	        }
 	        Object.keys(trackedEntry.files).forEach(function (file) {
 	            trackedEntry.files[file] = MatcherBuilder_1.matcherBuilder(trackedEntry, trackedEntry.files[file]);
 	        });

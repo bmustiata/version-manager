@@ -1,4 +1,4 @@
-# version-manager 1.5.0
+# version-manager 1.5.1
 
 Updates versions across multiple files.
 
@@ -14,18 +14,14 @@ npm install -g version-manager
 You need a `versions.json`, or a `versions.yml` where you can specify for what
 you're tracking the versions, and what files to be updated using glob patterns:
 
-```json
-{
-  "germanium" : {
-    "version": "1.10.3",
-    "files": {
-      "README.*": "^(germanium )(.*?)$",
-      "setup.py": "version='##VERSION##',",
-      "doc/usage/index.adoc": "^(= Germanium v)(.*?)()$",
-      "germanium/version.py": "current = \"##VERSION##\""
-    }
-  }
-}
+```yaml
+germanium:
+  version: 1.10.3
+  files:
+    "README.*": "^(germanium )(.*?)$"
+    "setup.py": "version='##VERSION##',"
+    "doc/usage/index.adoc": "^(= Germanium v)(.*?)$"
+    "germanium/version.py": "current = \"##VERSION##\""
 ```
 
 ## Specifying Versions

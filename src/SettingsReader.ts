@@ -30,6 +30,11 @@ export function readSettingsFile(settingsFile: string) : ITrackedVersionSet {
 
       trackedEntry.name = key
       trackedEntry.version = parseVersion(trackedEntry.version)
+      
+      // made the files optional, so we can have "bom" version files
+      if (!trackedEntry.files) {
+        trackedEntry.files = {};
+      }
 
       Object.keys(trackedEntry.files).forEach((file) => {
         trackedEntry.files[file] = matcherBuilder(trackedEntry, trackedEntry.files[file])
