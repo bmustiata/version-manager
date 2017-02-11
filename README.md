@@ -1,4 +1,4 @@
-# version-manager 1.5.1
+# version-manager 1.5.2
 
 Updates versions across multiple files.
 
@@ -190,3 +190,7 @@ or even individual expressions:
 
 1. Files are actually `glob` patterns, so you can match `**/*.js` for example.
 2. The configuration files can be yml.
+3. `version-manager` will output the following error codes: 0 when no files are
+   changed, 200 when files are changed successfuly, or a non zero error code in
+   case of error.
+
