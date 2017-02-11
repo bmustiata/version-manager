@@ -72,6 +72,7 @@ module.exports =
 	var defaultSettingsFile = path.resolve(path.join(process.cwd(), "versions.json"));
 	var versionsToProcess = SettingsReader_1.readSettingsFile(defaultSettingsFile);
 	var filesToProcess = {};
+	var changedFiles = false;
 	versionsToProcess.forEach(function (trackedVersion) {
 	    Object.keys(trackedVersion.files).forEach(function (fileName) {
 	        var versionPattern = trackedVersion.files[fileName];
@@ -107,10 +108,11 @@ module.exports =
 	        console.log(colors.cyan("Content for " + resolvedName + " is not changed. Won't patch it."));
 	        return;
 	    }
+	    changedFiles = true;
 	    fs.writeFileSync(resolvedName, newContent, "utf-8");
 	    console.log(colors.yellow("Updated " + resolvedName));
 	});
-	process.exit(0);
+	process.exit(changedFiles ? 200 : 0);
 
 /***/ },
 /* 3 */

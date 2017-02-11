@@ -11,6 +11,8 @@ const versionsToProcess = readSettingsFile(defaultSettingsFile);
 
 const filesToProcess : { [name: string] : Array<IPattern> } = {}
 
+let changedFiles: boolean = false
+
 versionsToProcess.forEach((trackedVersion) => {
   Object.keys(trackedVersion.files).forEach((fileName) => {
     let versionPattern = trackedVersion.files[fileName]
@@ -58,8 +60,10 @@ Object.keys(filesToProcess).forEach((resolvedName) => {
     return;
   }
 
+  changedFiles = true;
+
   fs.writeFileSync(resolvedName, newContent, "utf-8")
   console.log(colors.yellow(`Updated ${resolvedName}`))
 })
 
-process.exit(0);
+process.exit(changedFiles? 200 : 0);
