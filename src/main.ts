@@ -2,12 +2,29 @@ import * as fs from "fs"
 import * as glob from "glob"
 import * as colors from "colors"
 import * as path from "path"
+import * as nomnom from "nomnom"
 
 import { readSettingsFile } from './SettingsReader'
 import { IPattern } from "./interfaces"
 
+const argv = nomnom.option('version', {
+  abbr: 'v',
+  help: 'Display the version of a single tracked version.'
+}).parse();
+
 const defaultSettingsFile = path.resolve(path.join(process.cwd(), "versions.json"))
 const versionsToProcess = readSettingsFile(defaultSettingsFile);
+
+if (argv.version) {
+  let trackedVersion = versionsToProcess.find(it => it.name == argv.version)
+  if (!trackedVersion) {
+    console.error(`Tracked version '${argv.version}' does not exist. Available are: ${versionsToProcess.map(it => `'${it.name}'`).join(", ")}.`)
+    process.exit(1)
+  }
+
+  console.log(trackedVersion.version);
+  process.exit(0);
+}
 
 const filesToProcess : { [name: string] : Array<IPattern> } = {}
 
