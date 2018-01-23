@@ -10,6 +10,10 @@ import { IPattern } from "./interfaces"
 const argv = nomnom.option('version', {
   abbr: 'v',
   help: 'Display the version of a single tracked version.'
+}).option('all', {
+  abbr: 'a',
+  flag: true,
+  help: 'Display all the tracked versions and their values.'
 }).parse();
 
 const defaultSettingsFile = path.resolve(path.join(process.cwd(), "versions.json"))
@@ -23,6 +27,14 @@ if (argv.version) {
   }
 
   console.log(trackedVersion.version);
+  process.exit(0);
+}
+
+if (argv.all) {
+  versionsToProcess.forEach(it => {
+    console.log(`${it.name} => ${it.version}`)
+  });
+
   process.exit(0);
 }
 
