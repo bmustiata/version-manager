@@ -7,7 +7,7 @@ import { ITrackedVersionSet } from "./interfaces"
 // cache the settings files.
 const settingFiles : {[name: string]: ITrackedVersionSet} = {}
 
-function parseParentPath(version: string, cwd: string) : string {
+function parseParentPath(version: string, cwd: string, overridenSettings: { [name: string] : string}) : string {
     const items = /^parent:(.+)@(.+?)$/.exec(version)
 
     if (!items) {
@@ -29,7 +29,7 @@ function parseParentPath(version: string, cwd: string) : string {
     }
 
     if (!settingFiles[fullPath]) {
-        settingFiles[fullPath] = readSettingsFile(fullPath)
+        settingFiles[fullPath] = readSettingsFile(fullPath, overridenSettings)
     }
 
     const propertyValue = settingFiles[fullPath]
@@ -47,7 +47,7 @@ function parseParentPath(version: string, cwd: string) : string {
     return propertyValue.version
 }
 
-function parseVersionWithPath(version: string, cwd: string) : string {
+function parseVersionWithPath(version: string, cwd: string, overridenSettings: { [name: string] : string}) : string {
     // from here, the path becomes important, since the process execution
     // and the parent: referening depends on where the currently parsed
     // versions.json file is being parsed from.
@@ -64,7 +64,7 @@ function parseVersionWithPath(version: string, cwd: string) : string {
         // format: parent:../path/to/versions.json:property_name
         // or    : parent:../path/to:property_name
         if (version.startsWith('parent:')) {
-            return parseParentPath(version, cwd);
+            return parseParentPath(version, cwd, overridenSettings);
         }
 
         // if we don't need to execute anything, just go
@@ -82,6 +82,6 @@ function parseVersionWithPath(version: string, cwd: string) : string {
 /**
  * Parse the given version string.
  */
-export function parseVersion(version: string) : string {
-    return parseVersionWithPath(version, process.cwd());
+export function parseVersion(version: string, overridenSettings: { [name: string] : string}) : string {
+    return parseVersionWithPath(version, process.cwd(), overridenSettings);
 }

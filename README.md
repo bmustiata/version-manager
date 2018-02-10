@@ -1,4 +1,4 @@
-# version-manager 1.6.1
+# version-manager 1.7.0
 
 Updates versions across multiple files.
 
@@ -39,7 +39,7 @@ Versions can also refer to other version files, and extract properties from
 there, using the `parent:` notation in the version:
 
 ```json
-"description": {
+"germaniumdrivers": {
   "version": "parent:../germanium/@germaniumdrivers"
 }
 ```
@@ -48,9 +48,19 @@ The path will point to the `versions.json/yml` file, or to the folder that
 contains the `versions.json/yml` file, and the `germaniumdrivers` version will
 be used.
 
+Versions can be also manually overriden from the command line, using the
+`--set` or `-s` flag, for example:
+
+```sh
+version-manager -s germanium=2.0.8
+```
+
+This will ignore the value specified in the versions.yml file, and use the
+specified one.
+
 ## File Matchers
 
-There are currently only two file matchers:
+There are currently only four file matchers:
 
 ### RegExp File Matcher
 

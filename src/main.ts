@@ -5,6 +5,7 @@ import * as path from "path"
 import * as nomnom from "nomnom"
 
 import { readSettingsFile } from './SettingsReader'
+import { getParameterValues } from './OptionsSet'
 import { IPattern } from "./interfaces"
 
 const argv = nomnom.option('version', {
@@ -14,10 +15,15 @@ const argv = nomnom.option('version', {
   abbr: 'a',
   flag: true,
   help: 'Display all the tracked versions and their values.'
+}).option('set', {
+  abbr: 's',
+  list: true,
+  help: 'Set values overriding what\'s in the yml files.'
 }).parse();
 
 const defaultSettingsFile = path.resolve(path.join(process.cwd(), "versions.json"))
-const versionsToProcess = readSettingsFile(defaultSettingsFile);
+const overrideParameters = getParameterValues(argv.set)
+const versionsToProcess = readSettingsFile(defaultSettingsFile, overrideParameters);
 
 if (argv.version) {
   let trackedVersion = versionsToProcess.find(it => it.name == argv.version)

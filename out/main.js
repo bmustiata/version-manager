@@ -70,6 +70,7 @@ module.exports =
 	var path = __webpack_require__(6);
 	var nomnom = __webpack_require__(7);
 	var SettingsReader_1 = __webpack_require__(8);
+	var OptionsSet_1 = __webpack_require__(19);
 	var argv = nomnom.option('version', {
 	    abbr: 'v',
 	    help: 'Display the version of a single tracked version.'
@@ -77,9 +78,14 @@ module.exports =
 	    abbr: 'a',
 	    flag: true,
 	    help: 'Display all the tracked versions and their values.'
+	}).option('set', {
+	    abbr: 's',
+	    list: true,
+	    help: 'Set values overriding what\'s in the yml files.'
 	}).parse();
 	var defaultSettingsFile = path.resolve(path.join(process.cwd(), "versions.json"));
-	var versionsToProcess = SettingsReader_1.readSettingsFile(defaultSettingsFile);
+	var overrideParameters = OptionsSet_1.getParameterValues(argv.set);
+	var versionsToProcess = SettingsReader_1.readSettingsFile(defaultSettingsFile, overrideParameters);
 	if (argv.version) {
 	    var trackedVersion = versionsToProcess.find(function (it) {
 	        return it.name == argv.version;
@@ -188,7 +194,7 @@ module.exports =
 	 * readSettingsFile - Read the settings file.
 	 * @return {ITrackedVersionSet}
 	 */
-	function readSettingsFile(settingsFile) {
+	function readSettingsFile(settingsFile, overridenSettings) {
 	    if (!settingsFileExists(settingsFile)) {
 	        settingsFile = path.join(path.dirname(settingsFile), "versions.yml");
 	        if (!settingsFileExists(settingsFile)) {
@@ -200,7 +206,7 @@ module.exports =
 	    return Object.keys(settings).map(function (key) {
 	        var trackedEntry = settings[key];
 	        trackedEntry.name = key;
-	        trackedEntry.version = ParseVersion_1.parseVersion(trackedEntry.version);
+	        trackedEntry.version = trackedEntry.name in overridenSettings ? overridenSettings[trackedEntry.name] : ParseVersion_1.parseVersion(trackedEntry.version, overridenSettings);
 	        // made the files optional, so we can have "bom" version files
 	        if (!trackedEntry.files) {
 	            trackedEntry.files = {};
@@ -527,7 +533,7 @@ module.exports =
 	var SettingsReader_1 = __webpack_require__(8);
 	// cache the settings files.
 	var settingFiles = {};
-	function parseParentPath(version, cwd) {
+	function parseParentPath(version, cwd, overridenSettings) {
 	    var items = /^parent:(.+)@(.+?)$/.exec(version);
 	    if (!items) {
 	        throw new Error("The version must be in the 'parent:path@propertyname' " + ("format, got instead: '" + version + "'."));
@@ -542,7 +548,7 @@ module.exports =
 	        fullPath = path.join(fullPath, "versions.json");
 	    }
 	    if (!settingFiles[fullPath]) {
-	        settingFiles[fullPath] = SettingsReader_1.readSettingsFile(fullPath);
+	        settingFiles[fullPath] = SettingsReader_1.readSettingsFile(fullPath, overridenSettings);
 	    }
 	    var propertyValue = settingFiles[fullPath].find(function (it) {
 	        return it.name == propertyName;
@@ -555,7 +561,7 @@ module.exports =
 	    }
 	    return propertyValue.version;
 	}
-	function parseVersionWithPath(version, cwd) {
+	function parseVersionWithPath(version, cwd, overridenSettings) {
 	    // from here, the path becomes important, since the process execution
 	    // and the parent: referening depends on where the currently parsed
 	    // versions.json file is being parsed from.
@@ -569,7 +575,7 @@ module.exports =
 	        // format: parent:../path/to/versions.json:property_name
 	        // or    : parent:../path/to:property_name
 	        if (version.startsWith('parent:')) {
-	            return parseParentPath(version, cwd);
+	            return parseParentPath(version, cwd, overridenSettings);
 	        }
 	        // if we don't need to execute anything, just go
 	        // and return the current version.
@@ -584,8 +590,8 @@ module.exports =
 	/**
 	 * Parse the given version string.
 	 */
-	function parseVersion(version) {
-	    return parseVersionWithPath(version, process.cwd());
+	function parseVersion(version, overridenSettings) {
+	    return parseVersionWithPath(version, process.cwd(), overridenSettings);
 	}
 	exports.parseVersion = parseVersion;
 
@@ -594,6 +600,25 @@ module.exports =
 /***/ function(module, exports) {
 
 	module.exports = require("child_process");
+
+/***/ },
+/* 19 */
+/***/ function(module, exports) {
+
+	"use strict";
+	
+	function getParameterValues(valuesList) {
+	    var result = {};
+	    if (!valuesList) {
+	        return result;
+	    }
+	    valuesList.forEach(function (value) {
+	        var tokens = value.split("=", 2);
+	        result[tokens[0]] = tokens[1];
+	    });
+	    return result;
+	}
+	exports.getParameterValues = getParameterValues;
 
 /***/ }
 /******/ ]);

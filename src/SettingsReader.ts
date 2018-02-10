@@ -12,7 +12,7 @@ import { parseVersion } from "./ParseVersion"
  * readSettingsFile - Read the settings file.
  * @return {ITrackedVersionSet}
  */
-export function readSettingsFile(settingsFile: string) : ITrackedVersionSet {
+export function readSettingsFile(settingsFile: string, overridenSettings: { [name: string] : string}) : ITrackedVersionSet {
   if (!settingsFileExists(settingsFile)) {
     settingsFile = path.join(path.dirname(settingsFile), "versions.yml")
 
@@ -29,7 +29,9 @@ export function readSettingsFile(settingsFile: string) : ITrackedVersionSet {
       let trackedEntry = settings[key]
 
       trackedEntry.name = key
-      trackedEntry.version = parseVersion(trackedEntry.version)
+      trackedEntry.version = trackedEntry.name in overridenSettings ?
+                                overridenSettings[trackedEntry.name] :
+                                parseVersion(trackedEntry.version, overridenSettings)
       
       // made the files optional, so we can have "bom" version files
       if (!trackedEntry.files) {
